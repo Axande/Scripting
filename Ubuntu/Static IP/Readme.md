@@ -40,19 +40,9 @@ To run the script directly from the repository using `wget`:
 
 1. Use the following command to download and run the script:
    ```bash
-   wget -qO- https://raw.githubusercontent.com/Axande/Scripting/main/Ubuntu/setup_static_ip.sh | sudo bash
+   wget -qO- https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/Ubuntu/Static%20IP/setup_static_ip.sh | sudo bash
    ```
-
----
-
-### 3. Using the Script with `curl`
-
-Alternatively, you can run the script using `curl`:
-
-```bash
-curl -s https://raw.githubusercontent.com/Axande/Scripting/main/Ubuntu/setup_static_ip.sh | sudo bash
-```
-
+   
 ---
 
 ## Configuration
