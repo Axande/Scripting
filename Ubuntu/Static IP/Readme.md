@@ -5,8 +5,8 @@ This script simplifies the process of configuring a static IP address on an Ubun
 ---
 
 ## Features
-- Sets up a static IP address with a predefined network interface and settings.
-- Uses Netplan for modern Ubuntu network configuration.
+- Prompts the user for the static IP address during execution.
+- Sets up hardcoded settings for the network interface, gateway, and DNS servers.
 - Backs up the existing Netplan configuration file before applying changes.
 
 ---
@@ -42,7 +42,7 @@ To run the script directly from the repository using `wget`:
    ```bash
    wget -qO- https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/Ubuntu/Static%20IP/setup_static_ip.sh | sudo bash
    ```
-   
+
 ---
 
 ## Configuration

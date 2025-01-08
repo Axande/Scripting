@@ -4,20 +4,19 @@
 # Script for Setting Static IP on Ubuntu
 #
 # IMPORTANT:
-# 1. Update the following variables if moving to a new homelab setup:
+# 1. The user provides only the static IP address.
+# 2. Update the following hardcoded settings if moving to a new homelab:
 #    - INTERFACE: The network interface (e.g., enp6s18, eth0).
-#    - STATIC_IP: The desired static IP address for the machine (use CIDR /24 for subnet).
 #    - GATEWAY: The default gateway for the network.
 #    - DNS: The DNS servers for name resolution.
-#
-# 2. This script is designed for Ubuntu systems using Netplan.
+# 3. This script is designed for Ubuntu systems using Netplan.
 # ----------------------------
 
 # Hardcoded Variables
 INTERFACE="enp6s18"                  # Network interface
-STATIC_IP="192.168.0.213/24"         # Static IP address with /24 subnet
 GATEWAY="192.168.0.1"                # Default gateway
 DNS="8.8.8.8,1.1.1.1"               # DNS servers, comma-separated
+SUBNET="/24"                         # Subnet in CIDR notation
 
 # Check if run as root
 if [[ $EUID -ne 0 ]]; then
@@ -25,8 +24,25 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+# Welcome message
+echo "Welcome to the Static IP Setup Script for Ubuntu!"
+echo "This script will configure the network interface with hardcoded settings."
+echo "Please enter the static IP address for your machine (e.g., 192.168.0.213):"
+
+# Prompt the user for the static IP
+read -p "Static IP Address: " USER_IP
+
+# Validate user input
+if [[ -z "$USER_IP" ]]; then
+    echo "Error: No IP address entered. Please run the script again."
+    exit 1
+fi
+
+# Combine user input with subnet
+STATIC_IP="${USER_IP}${SUBNET}"
+
 # Confirm with the user
-echo "This script will configure the following settings:"
+echo "The script will apply the following settings:"
 echo "Interface: $INTERFACE"
 echo "Static IP: $STATIC_IP"
 echo "Gateway: $GATEWAY"
