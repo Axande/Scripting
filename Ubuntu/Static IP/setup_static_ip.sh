@@ -15,7 +15,7 @@
 # Hardcoded Variables
 INTERFACE="enp6s18"                  # Network interface
 GATEWAY="192.168.0.1"                # Default gateway
-DNS="8.8.8.8,1.1.1.1"               # DNS servers, comma-separated
+DNS=("8.8.8.8" "1.1.1.1")            # DNS servers, array format
 SUBNET="/24"                         # Subnet in CIDR notation
 
 # Check if run as root
@@ -46,7 +46,7 @@ echo "The script will apply the following settings:"
 echo "Interface: $INTERFACE"
 echo "Static IP: $STATIC_IP"
 echo "Gateway: $GATEWAY"
-echo "DNS: $DNS"
+echo "DNS: ${DNS[@]}"
 read -p "Do you want to proceed? (y/n): " CONFIRM
 
 if [[ "$CONFIRM" != "y" ]]; then
@@ -73,8 +73,13 @@ network:
         - to: default
           via: $GATEWAY
       nameservers:
-        addresses: [${DNS//,/ }]
+        addresses:
 EOL
+
+# Add DNS servers line by line
+for dns in "${DNS[@]}"; do
+    echo "          - $dns" >> $NETPLAN_FILE
+done
 
 # Apply configuration
 echo "Applying Netplan configuration..."
@@ -85,7 +90,7 @@ if [[ $? -eq 0 ]]; then
     echo "Interface: $INTERFACE"
     echo "Static IP: $STATIC_IP"
     echo "Gateway: $GATEWAY"
-    echo "DNS: $DNS"
+    echo "DNS: ${DNS[@]}"
     echo "Reboot the machine to ensure changes are persistent."
 else
     echo "Failed to apply Netplan configuration. Please check the logs."
