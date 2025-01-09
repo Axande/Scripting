@@ -96,3 +96,12 @@ else
     echo "Failed to apply Netplan configuration. Please check the logs."
     exit 1
 fi
+
+# Prompt to reboot
+read -p "Would you like to reboot now? (y/n): " REBOOT
+if [[ "$REBOOT" == "y" ]]; then
+    echo "Rebooting..."
+    reboot
+else
+    echo "Please reboot the machine manually to ensure changes are fully applied."
+fi
