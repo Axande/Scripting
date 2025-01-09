@@ -83,6 +83,8 @@ else
     exit 1
 fi
 
+read -p "Press Enter to continue..."
+
 # Step 2: Disable Swap
 echo "Disabling swap temporarily..."
 swapoff -a
@@ -105,6 +107,8 @@ fi
 
 echo "Swap disable process completed successfully."
 
+read -p "Press Enter to continue..."
+
 # Step 3: Configure Kernel Modules and Networking
 echo "Configure Kernel Modules and Networking"
 modprobe overlay
@@ -124,6 +128,8 @@ EOF
 sysctl --system
 
 echo "Kernel modules and networking configuration completed successfully."
+
+read -p "Press Enter to continue..."
 
 # Step 4: Install containerd and dependencies
 echo "Installing containerd and necessary dependencies..."
@@ -145,6 +151,8 @@ systemctl status containerd --no-pager
 # Confirm success
 echo "Containerd installation and configuration completed successfully."
 
+read -p "Press Enter to continue..."
+
 #Step 5: Setup Kubernetes
 echo "Setup Kubernetes..."
 mkdir -p /etc/apt/keyrings
@@ -158,6 +166,8 @@ systemctl restart kubelet
 systemctl status kubelet --no-pager
 
 echo "Kubernetes components installation completed successfully (if the kubelet service is not running, ensure swap is disabled and try again)."
+
+read -p "Press Enter to continue..."
 
 #Step 6: Setup the interconnectivity
 
@@ -201,14 +211,10 @@ if [[ "$NODE_TYPE" == "w" ]]; then
     eval "$KUBEADM_JOIN_COMMAND"
 fi
 
-#!/bin/bash
-
 echo "Kubernetes Setup Testing Script"
 
 echo
 echo "kubectl get pods -n kube-system"
-
-echo
 echo "kubectl get nodes"
 
 echo
@@ -222,4 +228,8 @@ echo "kubectl get svc -n demo-app"
 echo
 echo "Then, use the Node IP and the NodePort in a web browser or a curl command."
 echo "http://192.168.1.100:30001"
+
+echo
+echo "Recreating the join command"
+echo "kubeadm token create --print-join-command"
 
