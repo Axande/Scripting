@@ -1,0 +1,75 @@
+https://www.youtube.com/watch?v=I-zluW0ckrw&list=LL&index=1&t=1s
+
+
+sudo hostnamectl set-hostname "k8s-control-node"   # Master Node
+sudo hostnamectl set-hostname "k8s-worker01-node"  # Worker Node 1
+sudo hostnamectl set-hostname "k8s-worker02-node"  # Worker Node 2
+
+
+192.168.1.56  k8s-control-node
+192.168.1.57  k8s-worker01-node
+192.168.1.58  k8s-worker02-node
+
+
+sudo swapoff -a
+====> this this very important when do master node
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+
+sudo tee /etc/modules-load.d/k8s.conf <<EDF
+overlay
+br_netfilter
+EDF
+
+sudo tee /etc/sysctl.d/kubernetes.conf <<EDF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EDF
+
+sudo sysctl --system
+
+
+
+sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/containerd.gpg
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update && sudo apt install containerd.io -y
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo systemctl status docker
+
+
+containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+
+sudo systemctl restart containerd 
+sudo systemctl status containerd
+
+
+curl -fsSL  https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key  | sudo gpg --dearmor -o /etc/apt/keyrings/k8s.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/k8s.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/k8s.list
+
+sudo apt update
+sudo apt install -y kubelet kubeadm kubectl
+
+sudo systemctl restart kubelet 
+sudo systemctl status kubelet
+(if not working, disable swap one more time)
+
+sudo kubeadm init --control-plane-endpoint=k8s-control-node
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+kubeadm join master:6443 --token eee57c.hlfgsaeibwhs6vgn --discovery-token-ca-cert-hash sha256:ad8f887822ca41e9226f389c71202bdb7f39385683bba41892c65b0365a1a2ec

@@ -30,7 +30,7 @@ sudo reboot
 
 <details> 
   <summary>Set Hostname</summary>
-  
+
 # Update hostname
 
 This script updates the hostname of an Ubuntu machine.
@@ -48,9 +48,25 @@ chmod +x update_hostname.sh
 sudo ./update_hostname.sh
 ```
 
-### 3. Reboot
+</details>
+
+
+</details>
+
+<!-- K8S -->
+
+<details> 
+  <summary>K8S</summary>
+
+# Update hostname
+
+This script sets up kubernetes.
+
+---
+
+### 2. Disable swap permanently
 ```bash
-sudo reboot
+wget -qO- https://raw.githubusercontent.com/Axande/Scripting/main/k8s/02_disable_swap.sh | sudo bash
 ```
 
 </details>
