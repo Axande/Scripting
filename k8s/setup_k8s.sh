@@ -29,21 +29,23 @@ if [[ "$NODE_TYPE" == "m" ]]; then
     # Master node setup
     echo "Setting up a Master Node..."
 
-    # Ask for the hostname for the master node
-    read -p "Enter the hostname for the master node (e.g., k8s-master-node): " MASTER_HOSTNAME
+    # Get the current hostname
+    CURRENT_HOSTNAME=$(hostname)
 
-    if [[ -z "$MASTER_HOSTNAME" ]]; then
-        echo "Error: Hostname cannot be empty."
+    echo "Setting hostname to $CURRENT_HOSTNAME..."
+    hostnamectl set-hostname "$CURRENT_HOSTNAME"
+
+    # Get the current host's IP address
+    CURRENT_IP=$(hostname -I | awk '{print $1}') # Fetch the first IP address
+
+    if [[ -z "$CURRENT_IP" ]]; then
+        echo "Error: Unable to fetch the current host's IP address."
         exit 1
     fi
 
-    # Set hostname
-    echo "Setting hostname to $MASTER_HOSTNAME..."
-    hostnamectl set-hostname "$MASTER_HOSTNAME"
-
     # Update /etc/hosts
     echo "Updating /etc/hosts file..."
-    echo "192.168.1.56  $MASTER_HOSTNAME" >> /etc/hosts
+    sed -i "/.*master/c\\$CURRENT_IP  $CURRENT_HOSTNAME" /etc/hosts
 
 elif [[ "$NODE_TYPE" == "w" ]]; then
     # Worker node setup
@@ -71,8 +73,8 @@ elif [[ "$NODE_TYPE" == "w" ]]; then
 
     # Update /etc/hosts
     echo "Updating /etc/hosts file..."
+    sed -i "/.*master/c\\$CURRENT_IP  $CURRENT_HOSTNAME" /etc/hosts
     echo "$MASTER_IP  $MASTER_HOSTNAME" >> /etc/hosts
-    echo "$CURRENT_IP  $CURRENT_HOSTNAME" >> /etc/hosts
 
     echo "Worker node setup completed."
 
