@@ -3,7 +3,7 @@
 <details>
   <summary>Static IP</summary>
 
-# Static IP Setup Script for Ubuntu
+# Setup Static IP
 
 This script configures a static IP address on an Ubuntu machine using Netplan.
 
@@ -18,5 +18,10 @@ wget -O static_ip_setup.sh https://raw.githubusercontent.com/Axande/Scripting/re
 ```bash
 chmod +x static_ip_setup.sh
 sudo ./static_ip_setup.sh
+```
+
+### 3. Reboot
+```bash
+sudo reboot
 ```
 </details>
