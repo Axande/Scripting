@@ -17,6 +17,8 @@ INTERFACE="enp6s18"                  # Network interface
 GATEWAY="192.168.0.1"                # Default gateway
 DNS=("8.8.8.8" "1.1.1.1")            # DNS servers, array format
 SUBNET="/24"                         # Subnet in CIDR notation
+NETPLAN_DIR="/etc/netplan"
+NETPLAN_FILE="${NETPLAN_DIR}/01-netcfg.yaml"
 
 # Check if run as root
 if [[ $EUID -ne 0 ]]; then
@@ -54,19 +56,26 @@ if [[ "$CONFIRM" != "y" ]]; then
     exit 0
 fi
 
-# # Backup existing Netplan configuration
-# NETPLAN_FILE="/etc/netplan/01-netcfg.yaml"
-# if [[ -f $NETPLAN_FILE ]]; then
-#     cp $NETPLAN_FILE ${NETPLAN_FILE}.bak
-#     echo "Backup of $NETPLAN_FILE created."
-# fi
+# Backup and cleanup existing Netplan configuration
+echo "Cleaning up existing Netplan configuration..."
+if [[ -d $NETPLAN_DIR ]]; then
+    # Backup existing files
+    for file in ${NETPLAN_DIR}/*.yaml; do
+        [ -f "$file" ] && cp "$file" "$file.bak" && echo "Backup created for $file."
+    done
+
+    # Remove all existing files
+    rm -f ${NETPLAN_DIR}/*.yaml && echo "Existing Netplan configurations cleaned."
+fi
 
 # Write new Netplan configuration
+echo "Creating new Netplan configuration..."
 cat <<EOL > $NETPLAN_FILE
 network:
   version: 2
   ethernets:
     $INTERFACE:
+      dhcp4: false
       addresses:
         - $STATIC_IP
       routes:
