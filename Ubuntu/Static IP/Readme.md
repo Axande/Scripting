@@ -7,6 +7,7 @@ This script configures a static IP address on an Ubuntu machine using Netplan.
 ## How to Use the Script
 
 ### 1. Download the Script
+>! 
 ```bash
 wget -O setup_static_ip.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/Ubuntu/Static%20IP/setup_static_ip.sh
 ```
