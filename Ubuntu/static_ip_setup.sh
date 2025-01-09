@@ -54,12 +54,12 @@ if [[ "$CONFIRM" != "y" ]]; then
     exit 0
 fi
 
-# Backup existing Netplan configuration
-NETPLAN_FILE="/etc/netplan/01-netcfg.yaml"
-if [[ -f $NETPLAN_FILE ]]; then
-    cp $NETPLAN_FILE ${NETPLAN_FILE}.bak
-    echo "Backup of $NETPLAN_FILE created."
-fi
+# # Backup existing Netplan configuration
+# NETPLAN_FILE="/etc/netplan/01-netcfg.yaml"
+# if [[ -f $NETPLAN_FILE ]]; then
+#     cp $NETPLAN_FILE ${NETPLAN_FILE}.bak
+#     echo "Backup of $NETPLAN_FILE created."
+# fi
 
 # Write new Netplan configuration
 cat <<EOL > $NETPLAN_FILE
