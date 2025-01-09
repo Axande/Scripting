@@ -69,4 +69,25 @@ This script sets up kubernetes.
 wget -qO- https://raw.githubusercontent.com/Axande/Scripting/main/k8s/02_disable_swap.sh | sudo bash
 ```
 
+### 3. Configure Kernel Modules and Networking
+```bash
+wget -O configure_kernel_networking.sh https://raw.githubusercontent.com/Axande/Scripting/main/k8s/configure_kernel_networking.sh
+chmod +x configure_kernel_networking.sh
+sudo ./configure_kernel_networking.sh
+```
+
+### 4. Install and Configure Containerd
+```bash
+wget -O install_configure_containerd.sh https://raw.githubusercontent.com/Axande/Scripting/main/k8s/install_configure_containerd.sh
+chmod +x install_configure_containerd.sh
+sudo ./install_configure_containerd.sh
+```
+
+### 5. Install Kubernetes Components
+```bash
+wget -O install_kubernetes_components.sh https://raw.githubusercontent.com/YourRepo/Scripting/main/install_kubernetes_components.sh
+chmod +x install_kubernetes_components.sh
+sudo ./install_kubernetes_components.sh
+```
+
 </details>
