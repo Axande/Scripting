@@ -72,3 +72,19 @@ sudo ./setup_k8s.sh
 ```
 
 </details>
+
+<details> 
+  <summary>K8S</summary>
+
+# Setup K8S
+
+This script sets up kubernetes.
+
+```bash
+wget -O setup_github.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/k8s/setup_github.sh
+
+chmod +x setup_github.sh
+sudo ./setup_github.sh
+```
+
+</details>
