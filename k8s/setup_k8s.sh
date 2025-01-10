@@ -74,6 +74,7 @@ setup_node(){
 }
 
 disable_swap(){
+    #Changed
     echo "Disabling swap..."
     swapoff -a
     sed -i '/\s\+swap\s\+/ s/^/#/' /etc/fstab
