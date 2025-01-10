@@ -58,7 +58,7 @@ sudo ./update_hostname.sh
 <details> 
   <summary>K8S</summary>
 
-# Setup K8S
+# Setup Github
 
 This script sets up kubernetes.
 

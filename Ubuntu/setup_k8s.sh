@@ -137,47 +137,105 @@ reset_kubernetes() {
 }
 
 setup_master_node_k8s(){
-    if [[ "$NODE_TYPE" == "m" ]]; then
-        echo "Initializing the Master Node..."
-        sudo kubeadm init --control-plane-endpoint=$MASTER_HOSTNAME
+    echo "Initializing the Master Node..."
+    sudo kubeadm init --control-plane-endpoint=$MASTER_HOSTNAME
 
-        echo "Setting up kubectl for the current user..."
-        mkdir -p $HOME/.kube
-        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    echo "Setting up kubectl for the current user..."
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-        # Install Calico network plugin
-        echo "Installing Calico network plugin..."
-        kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-        if [[ $? -ne 0 ]]; then
-            echo "Error: Failed to install Calico network plugin."
-            exit 1
-        fi
-
-        # Install Flannel network plugin
-        echo "Installing Flannel network plugin..."
-        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-        if [[ $? -ne 0 ]]; then
-            echo "Error: Failed to install Flannel network plugin."
-            exit 1
-        fi
+    # Install Calico network plugin
+    echo "Installing Calico network plugin..."
+    kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Failed to install Calico network plugin."
+        exit 1
     fi
+
+    # Install Flannel network plugin
+    echo "Installing Flannel network plugin..."
+    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Failed to install Flannel network plugin."
+        exit 1
+    fi 
 }
 
 setup_worker_node_k8s(){
-    if [[ "$NODE_TYPE" == "w" ]]; then
-        echo "Setting up the Worker Node..."
-        echo "Please run the following kubeadm join command on the Worker Node: \"kubeadm token create --print-join-command\""
-        read -p "Enter the kubeadm join command provided by the Master Node: " KUBEADM_JOIN_COMMAND
-        
+    echo "Setting up the Worker Node..."
+    echo "Please run the following kubeadm join command on the Worker Node: \"kubeadm token create --print-join-command\""
+    read -p "Enter the kubeadm join command provided by the Master Node: " KUBEADM_JOIN_COMMAND
+    
 
-        if [[ -z "$KUBEADM_JOIN_COMMAND" ]]; then
-            echo "Error: kubeadm join command cannot be empty."
-            exit 1
-        fi
+    if [[ -z "$KUBEADM_JOIN_COMMAND" ]]; then
+        echo "Error: kubeadm join command cannot be empty."
+        exit 1
+    fi
 
-        echo "Joining the Worker Node to the cluster..."
-        eval "$KUBEADM_JOIN_COMMAND"
+    echo "Joining the Worker Node to the cluster..."
+    eval "$KUBEADM_JOIN_COMMAND"
+}
+
+setup_metallb(){
+    echo "Setup MetalLB..."
+
+    kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/main/config/manifests/metallb-native.yaml
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to apply MetalLB manifests. Exiting."
+        exit 1
+    fi
+
+    # Wait for MetalLB pods to start
+    echo "Waiting for MetalLB pods to be ready..."
+    kubectl -n metallb-system wait --for=condition=Ready pods --all --timeout=120s
+    if [[ $? -ne 0 ]]; then
+        echo "MetalLB pods failed to start. Exiting."
+        exit 1
+    fi
+
+    # Step 2: Ask user for IP range
+    echo "Please provide the IP range for MetalLB to use:"
+    read -p "Enter the lower bound of the IP range (e.g., 192.168.0.220): " IP_LOWER
+    read -p "Enter the upper bound of the IP range (e.g., 192.168.0.230): " IP_UPPER
+
+    # Validate input
+    if [[ -z "$IP_LOWER" || -z "$IP_UPPER" ]]; then
+        echo "Error: Both lower and upper bounds are required. Exiting."
+        exit 1
+    fi
+
+    echo "Using IP range: $IP_LOWER - $IP_UPPER"
+    
+
+    cat <<EOF | kubectl apply -f -
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  namespace: metallb-system
+  name: my-ip-pool
+spec:
+  addresses:
+  - $IP_LOWER-$IP_UPPER
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  namespace: metallb-system
+  name: my-l2-adv
+spec: {}
+EOF
+
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to configure IP Address Pool. Exiting."
+        exit 1
+    fi
+
+    # Step 3: Verify Configuration
+    kubectl -n metallb-system get pods
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to verify MetalLB pods. Exiting."
+        exit 1
     fi
 }
 
@@ -228,12 +286,15 @@ if [ "$user_input" = "y" ] || [ "$user_input" = "Y" ]; then
     reset_kubernetes
 fi
 
-#Step 6: Setup the interconnectivity
+# Step 6a: Master Node Setup
+if [[ "$NODE_TYPE" == "m" ]]; then
+    setup_master_node_k8s
+    setup_metallb
+fi
 
-setup_master_node_k8s
-
-# Worker Node Setup
-setup_worker_node_k8s
+# Step 6b: Worker Node Setup
+if [[ "$NODE_TYPE" == "w" ]]; then
+    setup_worker_node_k8s
+fi
 
 post_setup_info
-
