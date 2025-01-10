@@ -207,7 +207,6 @@ setup_metallb(){
 
     echo "Using IP range: $IP_LOWER - $IP_UPPER"
     
-
     cat <<EOF | kubectl apply -f -
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
