@@ -13,38 +13,6 @@
 # - This script must be run with root privileges.
 # ----------------------------
 
-# Check if run as root
-if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root. Use sudo."
-    exit 1
-fi
-
-echo "Welcome to the Kubernetes Node Setup Script!"
-
-
-setup_node # Step 1: Setup the node based on its type
-disable_swap # Step 2: Disable Swap
-setup_kernel_modules # Step 3: Configure Kernel Modules and Networking
-setup_containerd # Step 4: Install containerd and dependencies
-setup_kubernetes #Step 5: Setup Kubernetes
-
-# Step 5b. Clean kubernetes installation
-echo "Do you want to clean any previous Kubernetes installation? (y/n)"
-read -r user_input
-
-if [ "$user_input" = "y" ] || [ "$user_input" = "Y" ]; then
-    reset_kubernetes
-fi
-
-#Step 6: Setup the interconnectivity
-
-setup_master_node_k8s
-
-# Worker Node Setup
-setup_worker_node_k8s
-
-post_setup_info
-
 setup_node(){
     read -p "Please select the type of node you want to set up: Master Node(m) or Worker Node(w): " NODE_TYPE
 
@@ -252,3 +220,37 @@ post_setup_info(){
     echo "Recreating the join command"
     echo "kubeadm token create --print-join-command"
 }
+
+# Main Script Execution
+# ----------------------------
+# Check if run as root
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root. Use sudo."
+    exit 1
+fi
+
+echo "Welcome to the Kubernetes Node Setup Script!"
+
+
+setup_node # Step 1: Setup the node based on its type
+disable_swap # Step 2: Disable Swap
+setup_kernel_modules # Step 3: Configure Kernel Modules and Networking
+setup_containerd # Step 4: Install containerd and dependencies
+setup_kubernetes #Step 5: Setup Kubernetes
+
+# Step 5b. Clean kubernetes installation
+echo "Do you want to clean any previous Kubernetes installation? (y/n)"
+read -r user_input
+
+if [ "$user_input" = "y" ] || [ "$user_input" = "Y" ]; then
+    reset_kubernetes
+fi
+
+#Step 6: Setup the interconnectivity
+
+setup_master_node_k8s
+
+# Worker Node Setup
+setup_worker_node_k8s
+
+post_setup_info
