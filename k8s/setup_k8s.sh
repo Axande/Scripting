@@ -74,7 +74,13 @@ elif [[ "$NODE_TYPE" == "w" ]]; then
     # Update /etc/hosts
     echo "Updating /etc/hosts file..."
     sed -i "s/^.*$CURRENT_HOSTNAME\$/$CURRENT_IP  $CURRENT_HOSTNAME/" /etc/hosts
-    echo -e "\n$MASTER_IP  $MASTER_HOSTNAME" >> /etc/hosts
+
+    # Add master details directly after the worker entry
+    if grep -q "$CURRENT_HOSTNAME" /etc/hosts; then
+        sed -i "/$CURRENT_HOSTNAME/a\\$MASTER_IP  $MASTER_HOSTNAME" /etc/hosts
+    else
+        echo "$MASTER_IP  $MASTER_HOSTNAME" >> /etc/hosts
+    fi
 
     echo "Worker node setup completed."
 
@@ -96,7 +102,7 @@ else
 fi
 
 echo "Permanently disabling swap..."
-sed -i '/ swap / s/^/#/' /etc/fstab
+sed -i '/\s\+swap\s\+/ s/^/#/' /etc/fstab
 
 if ! grep -q "swap" /proc/swaps; then
     echo "Swap has been permanently disabled."
