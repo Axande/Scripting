@@ -64,6 +64,9 @@ This script sets up kubernetes.
 
 ```bash
 wget -O setup_k8s.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/k8s/setup_k8s.sh
+
+curl -o setup_k8s.sh -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/k8s/setup_k8s.sh?$(date +%s)"
+
 chmod +x setup_k8s.sh
 sudo ./setup_k8s.sh
 ```

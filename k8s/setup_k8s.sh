@@ -134,11 +134,6 @@ setup_kubernetes(){
 reset_kubernetes() {
     echo "Cleaning up previous Kubernetes installation..."
     sudo kubeadm reset --force
-    if [ $? -eq 0 ]; then
-    else
-        echo "Failed to reset Kubernetes. Please check for issues."
-        exit 1
-    fi
 }
 
 setup_master_node_k8s(){
