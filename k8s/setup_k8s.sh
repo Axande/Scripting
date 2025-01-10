@@ -101,6 +101,7 @@ else
     exit 1
 fi
 
+#CHANGED
 echo "Permanently disabling swap..."
 sed -i '/\s\+swap\s\+/ s/^/#/' /etc/fstab
 
