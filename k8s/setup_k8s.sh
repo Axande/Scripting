@@ -45,7 +45,7 @@ if [[ "$NODE_TYPE" == "m" ]]; then
 
     # Update /etc/hosts
     echo "Updating /etc/hosts file..."
-    sed -i "/.*master/c\\$CURRENT_IP  $CURRENT_HOSTNAME" /etc/hosts
+    sed -i "s/^.*$CURRENT_HOSTNAME\$/$CURRENT_IP  $CURRENT_HOSTNAME/" /etc/hosts
 
 elif [[ "$NODE_TYPE" == "w" ]]; then
     # Worker node setup
@@ -73,8 +73,8 @@ elif [[ "$NODE_TYPE" == "w" ]]; then
 
     # Update /etc/hosts
     echo "Updating /etc/hosts file..."
-    sed -i "/.*master/c\\$CURRENT_IP  $CURRENT_HOSTNAME" /etc/hosts
-    echo "$MASTER_IP  $MASTER_HOSTNAME" >> /etc/hosts
+    sed -i "s/^.*$CURRENT_HOSTNAME\$/$CURRENT_IP  $CURRENT_HOSTNAME/" /etc/hosts
+    echo -e "\n$MASTER_IP  $MASTER_HOSTNAME" >> /etc/hosts
 
     echo "Worker node setup completed."
 
@@ -200,7 +200,9 @@ fi
 # Worker Node Setup
 if [[ "$NODE_TYPE" == "w" ]]; then
     echo "Setting up the Worker Node..."
+    echo "Please run the following kubeadm join command on the Worker Node: \"kubeadm token create --print-join-command\""
     read -p "Enter the kubeadm join command provided by the Master Node: " KUBEADM_JOIN_COMMAND
+    
 
     if [[ -z "$KUBEADM_JOIN_COMMAND" ]]; then
         echo "Error: kubeadm join command cannot be empty."
