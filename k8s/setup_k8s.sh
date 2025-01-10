@@ -76,20 +76,7 @@ setup_node(){
 disable_swap(){
     echo "Disabling swap..."
     swapoff -a
-
-    if [[ $? -eq 0 ]]; then
-    else
-        echo "Failed to disable swap temporarily. Please check for issues."
-        exit 1
-    fi
-
     sed -i '/\s\+swap\s\+/ s/^/#/' /etc/fstab
-
-    if ! grep -q "swap" /proc/swaps; then
-    else
-        echo "Failed to disable swap permanently. Please check /etc/fstab."
-        exit 1
-    fi
 }
 
 setup_kernel_modules(){
