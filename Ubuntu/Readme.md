@@ -63,9 +63,9 @@ sudo ./update_hostname.sh
 This script sets up kubernetes.
 
 ```bash
-wget -O setup_k8s.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/k8s/setup_k8s.sh
+wget -O setup_k8s.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/Ubuntu/setup_k8s.sh
 
-curl -o setup_k8s.sh -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/k8s/setup_k8s.sh?$(date +%s)"
+curl -o setup_k8s.sh -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/Ubuntu/setup_k8s.sh?$(date +%s)"
 
 chmod +x setup_k8s.sh
 sudo ./setup_k8s.sh
@@ -74,14 +74,14 @@ sudo ./setup_k8s.sh
 </details>
 
 <details> 
-  <summary>K8S</summary>
+  <summary>Github</summary>
 
 # Setup K8S
 
 This script sets up kubernetes.
 
 ```bash
-wget -O setup_github.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/k8s/setup_github.sh
+wget -O setup_github.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/Ubuntu/setup_github.sh
 
 chmod +x setup_github.sh
 sudo ./setup_github.sh
