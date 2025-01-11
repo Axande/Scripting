@@ -256,8 +256,8 @@ post_setup_info(){
     echo "http://192.168.1.100:30001"
 
     echo
-    echo "Recreating the join command"
-    echo "kubeadm token create --print-join-command"
+    echo "Assign new node as worker node:"
+    echo "kubectl taint nodes <node-name> node-role.kubernetes.io/master:NoSchedule-"
 }
 
 # Main Script Execution
