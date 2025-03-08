@@ -68,3 +68,4 @@ download_and_execute() {
 selected_folder=$(select_folder)
 script_paths=($(select_scripts "$selected_folder"))
 download_and_execute "${script_paths[@]}"
+#V3
