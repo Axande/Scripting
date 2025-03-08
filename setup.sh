@@ -2,6 +2,8 @@
 
 # Define scripts and their display names
 declare -A scripts
+scripts["Update ubuntu apt"]="linux/ubuntu_update.sh"
+scripts["Docker install"]="linux/docker_install.sh"
 scripts["Create User"]="linux/create_user.sh"
 scripts["Setup GitHub"]="linux/setup_github.sh"
 scripts["Setup Kubernetes"]="linux/setup_k8s.sh"
