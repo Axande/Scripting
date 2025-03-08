@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./scripts/helpers/multiselectMenu.sh
+source ./scripts/multiselectMenu.sh
 
 # Define scripts and their display names
 declare -A scripts

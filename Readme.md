@@ -4,11 +4,11 @@
 
 ### 1. Download the Script
 ```bash
-wget -O update_hostname.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/setup.sh
+wget -O setup.sh https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main/setup.sh
 ```
 
 ### 2. Run the Script
 ```bash
-chmod +x update_hostname.sh
-sudo ./update_hostname.sh
+chmod +x setup.sh
+sudo ./setup.sh
 ```
