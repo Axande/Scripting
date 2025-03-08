@@ -1,75 +1,91 @@
 #!/bin/bash
 
 # ----------------------------
-# Script for Setting Static IP on Ubuntu
+# Ubuntu Static IP Configuration Script using Netplan
+# ----------------------------
+# This script configures a static IP address for a specified network interface.
+# Users must provide:
+#   - Network interface name (e.g., enp6s18, eth0)
+#   - Static IP address
 #
-# IMPORTANT:
-# 1. The user provides only the static IP address.
-# 2. Update the following hardcoded settings if moving to a new homelab:
-#    - INTERFACE: The network interface (e.g., enp6s18, eth0).
-#    - GATEWAY: The default gateway for the network.
-#    - DNS: The DNS servers for name resolution.
-# 3. This script is designed for Ubuntu systems using Netplan.
+# Features:
+# ✅ Prompts user for interface name dynamically
+# ✅ Ensures correct permissions for Netplan files
+# ✅ Backs up existing Netplan configurations
+# ✅ Asks for user confirmation before applying changes
 # ----------------------------
 
-# Hardcoded Variables
-INTERFACE="enp6s18"                  # Network interface
-GATEWAY="192.168.0.1"                # Default gateway
-DNS=("8.8.8.8" "1.1.1.1")            # DNS servers, array format
-SUBNET="/24"                         # Subnet in CIDR notation
+# Netplan configuration directory
 NETPLAN_DIR="/etc/netplan"
-NETPLAN_FILE="${NETPLAN_DIR}/01-netcfg.yaml"
 
 # Check if run as root
 if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root. Use sudo."
+    echo "❌ Error: This script must be run as root. Use sudo."
     exit 1
 fi
 
 # Welcome message
-echo "Welcome to the Static IP Setup Script for Ubuntu!"
-echo "This script will configure the network interface with hardcoded settings."
-echo "Please enter the static IP address for your machine (e.g., 192.168.0.213):"
+echo "🔹 Welcome to the Ubuntu Static IP Setup Script!"
+echo "💡 This script will configure your network interface with a static IP."
+echo ""
 
-# Prompt the user for the static IP
-read -p "Static IP Address: " USER_IP
+# List available network interfaces
+echo "🔍 Available network interfaces:"
+ip -o link show | awk -F': ' '{print "  - " $2}'
 
-# Validate user input
-if [[ -z "$USER_IP" ]]; then
-    echo "Error: No IP address entered. Please run the script again."
+# Prompt for network interface name
+read -p "Enter your network interface name (e.g., eth0, enp6s18): " INTERFACE
+
+# Validate the interface
+if ! ip link show "$INTERFACE" > /dev/null 2>&1; then
+    echo "❌ Error: Network interface '$INTERFACE' not found. Please check and try again."
     exit 1
 fi
 
-# Combine user input with subnet
-STATIC_IP="${USER_IP}${SUBNET}"
+# Prompt for static IP
+read -p "Enter the static IP address (e.g., 192.168.0.220): " USER_IP
+if [[ -z "$USER_IP" ]]; then
+    echo "❌ Error: No IP address entered. Please run the script again."
+    exit 1
+fi
 
-# Confirm with the user
-echo "The script will apply the following settings:"
-echo "Interface: $INTERFACE"
-echo "Static IP: $STATIC_IP"
-echo "Gateway: $GATEWAY"
-echo "DNS: ${DNS[@]}"
+# Set other network details
+SUBNET="/24"                             # Subnet in CIDR notation
+GATEWAY="192.168.0.1"                    # Default gateway
+DNS=("8.8.8.8" "1.1.1.1")                # DNS servers
+STATIC_IP="${USER_IP}${SUBNET}"           # Full static IP
+NETPLAN_FILE="${NETPLAN_DIR}/01-netcfg.yaml"
+
+# Confirm settings with the user
+echo ""
+echo "⚙️  The script will apply the following settings:"
+echo "🔹 Interface:  $INTERFACE"
+echo "🔹 Static IP:  $STATIC_IP"
+echo "🔹 Gateway:    $GATEWAY"
+echo "🔹 DNS:        ${DNS[@]}"
 read -p "Do you want to proceed? (y/n): " CONFIRM
 
 if [[ "$CONFIRM" != "y" ]]; then
-    echo "Aborted by user."
+    echo "❌ Aborted by user."
     exit 0
 fi
 
-# Backup and cleanup existing Netplan configuration
-echo "Cleaning up existing Netplan configuration..."
-if [[ -d $NETPLAN_DIR ]]; then
-    # Backup existing files
-    for file in ${NETPLAN_DIR}/*.yaml; do
-        [ -f "$file" ] && cp "$file" "$file.bak" && echo "Backup created for $file."
-    done
+# Backup existing Netplan configuration
+echo "📂 Backing up existing Netplan configurations..."
+mkdir -p "${NETPLAN_DIR}/backup"
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+for file in ${NETPLAN_DIR}/*.yaml; do
+    [ -f "$file" ] && cp "$file" "${NETPLAN_DIR}/backup/$(basename $file).bak-$TIMESTAMP"
+done
+echo "✅ Backup completed."
 
-    # Remove all existing files
-    rm -f ${NETPLAN_DIR}/*.yaml && echo "Existing Netplan configurations cleaned."
-fi
+# Clean up existing Netplan files
+echo "🧹 Removing existing Netplan configuration files..."
+rm -f ${NETPLAN_DIR}/*.yaml
+echo "✅ Old Netplan configurations removed."
 
-# Write new Netplan configuration
-echo "Creating new Netplan configuration..."
+# Create new Netplan configuration
+echo "📝 Creating new Netplan configuration file: $NETPLAN_FILE..."
 cat <<EOL > $NETPLAN_FILE
 network:
   version: 2
@@ -85,32 +101,38 @@ network:
         addresses:
 EOL
 
-# Add DNS servers line by line
+# Append DNS servers line by line
 for dns in "${DNS[@]}"; do
     echo "          - $dns" >> $NETPLAN_FILE
 done
 
-# Apply configuration
-echo "Applying Netplan configuration..."
+# Apply correct permissions
+echo "🔒 Applying correct permissions to Netplan file..."
+chmod 600 "$NETPLAN_FILE"
+echo "✅ Permissions set to 600 (root-only access)."
+
+# Apply Netplan configuration
+echo "🚀 Applying Netplan changes..."
 netplan apply
 
+# Check if Netplan applied successfully
 if [[ $? -eq 0 ]]; then
-    echo "Static IP configuration applied successfully!"
-    echo "Interface: $INTERFACE"
-    echo "Static IP: $STATIC_IP"
-    echo "Gateway: $GATEWAY"
-    echo "DNS: ${DNS[@]}"
-    echo "Reboot the machine to ensure changes are persistent."
+    echo "✅ Static IP configuration applied successfully!"
+    echo "🌐 Interface:  $INTERFACE"
+    echo "🌐 Static IP:  $STATIC_IP"
+    echo "🌐 Gateway:    $GATEWAY"
+    echo "🌐 DNS:        ${DNS[@]}"
+    echo "🔄 Please reboot the machine to ensure changes persist."
 else
-    echo "Failed to apply Netplan configuration. Please check the logs."
+    echo "❌ Error: Failed to apply Netplan configuration. Please check logs with: journalctl -xe"
     exit 1
 fi
 
 # Prompt to reboot
 read -p "Would you like to reboot now? (y/n): " REBOOT
 if [[ "$REBOOT" == "y" ]]; then
-    echo "Rebooting..."
+    echo "🔄 Rebooting..."
     reboot
 else
-    echo "Please reboot the machine manually to ensure changes are fully applied."
+    echo "✅ Setup complete. Please reboot manually to apply changes."
 fi
