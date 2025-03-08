@@ -57,7 +57,7 @@ download_and_execute() {
 
         mkdir -p "$folder_path"
         echo "Downloading: $script_path"
-        wget -O "$script_path" "$GITHUB_BASE_URL/$script_name"
+        wget -O "$script_path" "$GITHUB_BASE_URL/$folder_path/$script_name"
         chmod +x "$script_path"
         echo "Running: $script_path"
         sudo "$script_path"
