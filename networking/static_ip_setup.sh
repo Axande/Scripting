@@ -29,10 +29,6 @@ echo "🔹 Welcome to the Ubuntu Static IP Setup Script!"
 echo "💡 This script will configure your network interface with a static IP."
 echo ""
 
-# List available network interfaces
-echo "🔍 Available network interfaces:"
-ip -o link show | awk -F': ' '{print "  - " $2}'
-
 # Prompt for network interface name
 read -p "Enter your network interface name (e.g., eth0, enp6s18): " INTERFACE
 
