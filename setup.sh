@@ -2,11 +2,11 @@
 
 # Define scripts and their display names
 declare -A scripts
-scripts["Create User"]="Ubuntu/create_user.sh"
-scripts["Setup GitHub"]="Ubuntu/setup_github.sh"
-scripts["Setup Kubernetes"]="Ubuntu/setup_k8s.sh"
-scripts["Setup Static IP"]="Ubuntu/static_ip_setup.sh"
-scripts["Update Hostname"]="Ubuntu/update_hostname.sh"
+scripts["Create User"]="linux/create_user.sh"
+scripts["Setup GitHub"]="linux/setup_github.sh"
+scripts["Setup Kubernetes"]="linux/setup_k8s.sh"
+scripts["Setup Static IP"]="linux/static_ip_setup.sh"
+scripts["Update Hostname"]="linux/update_hostname.sh"
 
 # Prepare multiselect menu options
 options=("All")
