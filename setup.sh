@@ -1,8 +1,8 @@
 # Define script categories and their script URLs
 declare -A script_folders
-script_folders["linux"]="Update ubuntu apt:ubuntu_update.sh Docker install:docker_install.sh Create User:create_user.sh Setup GitHub:setup_github.sh"
-script_folders["networking"]="Setup Static IP:static_ip_setup.sh Update Hostname:update_hostname.sh"
-script_folders["kubernetes"]="Setup Kubernetes:setup_k8s.sh"
+script_folders["linux"]="Update ubuntu apt;ubuntu_update.sh;Docker install;docker_install.sh;Create User;create_user.sh;Setup GitHub;setup_github.sh"
+script_folders["networking"]="Setup Static IP;static_ip_setup.sh;Update Hostname;update_hostname.sh"
+script_folders["kubernetes"]="Setup Kubernetes;setup_k8s.sh"
 
 GITHUB_BASE_URL="https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main"
 
@@ -28,13 +28,12 @@ select_scripts() {
     local script_options=()
     declare -A script_map
     
-    # Convert space-separated string into an array
-    IFS=' ' read -r -a script_entries <<< "${script_folders[$selected_folder]}"
-    
-    for script_entry in "${script_entries[@]}"; do
-        script_name="${script_entry#*:}"
+    IFS=';' read -ra script_entries <<< "${script_folders[$selected_folder]}"
+    for ((i = 0; i < ${#script_entries[@]}; i += 2)); do
+        script_name="${script_entries[i]}"
+        script_file="${script_entries[i+1]}"
         script_options+=("$script_name")
-        script_map["$script_name"]="$selected_folder/$script_name"
+        script_map["$script_name"]="$selected_folder/$script_file"
     done
 
     local selected_scripts=()
@@ -51,7 +50,7 @@ select_scripts() {
 
 # Function to download and execute scripts
 download_and_execute() {
-    local script_paths=("$@")
+    local script_paths=($@)
     for script_path in "${script_paths[@]}"; do
         local folder_path="$(dirname "$script_path")"
         local script_name="$(basename "$script_path")"
