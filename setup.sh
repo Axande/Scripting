@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ./scripts/helpers/multiselectMenu.sh
+
 # Define scripts and their display names
 declare -A scripts
 scripts["Update ubuntu apt"]="linux/ubuntu_update.sh"
