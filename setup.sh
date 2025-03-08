@@ -136,74 +136,59 @@ script_folders["Kubernetes"]=(
 
 GITHUB_BASE_URL="https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main"
 
-# Select folder first
-folder_options=("All")
-for folder in "${!script_folders[@]}"; do
-    folder_options+=("$folder")
-done
 
-selected_folder=""
-select selected_folder in "${folder_options[@]}"; do
-    if [[ -n "$selected_folder" ]]; then
-        break
-    fi
-done
-
-# If "All" is selected, run all scripts from all folders
-if [[ "$selected_folder" == "All" ]]; then
+# Function to select a folder
+select_folder() {
+    local folder_options=()
     for folder in "${!script_folders[@]}"; do
-        mkdir -p "$folder"
-        for script_entry in "${script_folders[$folder][@]}"; do
-            script_name="${script_entry#*:}"
-            script_path="$folder/$script_name"
-            echo "Downloading: $script_path"
-            wget -O "$script_path" "$GITHUB_BASE_URL/$script_name"
-            chmod +x "$script_path"
-            echo "Running: $script_path"
-            sudo "$script_path"
-        done
+        folder_options+=("$folder")
     done
-    exit 0
-fi
 
-# Prepare script options for the selected folder
-script_options=("All")
-declare -A script_map
-for script_entry in "${script_folders[$selected_folder][@]}"; do
-    script_name="${script_entry#*:}"
-    script_options+=("$script_name")
-    script_map["$script_name"]="$selected_folder/$script_name"
-done
-
-# Select script(s) to run
-selected_scripts=()
-select script_choice in "${script_options[@]}"; do
-    if [[ -n "$script_choice" ]]; then
-        if [[ "$script_choice" == "All" ]]; then
-            mkdir -p "$selected_folder"
-            for script_name in "${script_map[@]}"; do
-                script_path="$selected_folder/$script_name"
-                echo "Downloading: $script_path"
-                wget -O "$script_path" "$GITHUB_BASE_URL/$script_name"
-                chmod +x "$script_path"
-                echo "Running: $script_path"
-                sudo "$script_path"
-            done
-            exit 0
-        else
-            selected_scripts+=("$script_choice")
+    local selected_folder=""
+    select selected_folder in "${folder_options[@]}"; do
+        if [[ -n "$selected_folder" ]]; then
+            echo "$selected_folder"
+            return
         fi
-    fi
-    [[ "${#selected_scripts[@]}" -gt 0 ]] && break
-done
+    done
+}
 
-# Execute selected scripts
-mkdir -p "$selected_folder"
-for script in "${selected_scripts[@]}"; do
-    script_path="$selected_folder/$script"
+# Function to select a script within a folder
+select_script() {
+    local selected_folder="$1"
+    local script_options=()
+    declare -A script_map
+    
+    for script_entry in "${script_folders[$selected_folder][@]}"; do
+        script_name="${script_entry#*:}"
+        script_options+=("$script_name")
+        script_map["$script_name"]="$selected_folder/$script_name"
+    done
+
+    local selected_script=""
+    select selected_script in "${script_options[@]}"; do
+        if [[ -n "$selected_script" ]]; then
+            echo "${script_map[$selected_script]}"
+            return
+        fi
+    done
+}
+
+# Function to download and execute a script
+download_and_execute() {
+    local script_path="$1"
+    local folder_path="$(dirname "$script_path")"
+    local script_name="$(basename "$script_path")"
+
+    mkdir -p "$folder_path"
     echo "Downloading: $script_path"
-    wget -O "$script_path" "$GITHUB_BASE_URL/$script"
+    wget -O "$script_path" "$GITHUB_BASE_URL/$script_name"
     chmod +x "$script_path"
     echo "Running: $script_path"
     sudo "$script_path"
-done
+}
+
+# Main execution
+selected_folder=$(select_folder)
+script_path=$(select_script "$selected_folder")
+download_and_execute "$script_path"
