@@ -117,25 +117,23 @@ function multiselect {
 
 # Define script categories and their script URLs
 declare -A script_folders
-script_folders["Linux"]=(
+script_folders["linux"]=(
     "Update ubuntu apt:ubuntu_update.sh"
     "Docker install:docker_install.sh"
     "Create User:create_user.sh"
     "Setup GitHub:setup_github.sh"
-    "Setup K8S:setup_k8s.sh"
 )
 
-script_folders["Networking"]=(
+script_folders["networking"]=(
     "Setup Static IP:static_ip_setup.sh"
     "Update Hostname:update_hostname.sh"
 )
 
-script_folders["Kubernetes"]=(
+script_folders["kubernetes"]=(
     "Setup Kubernetes:setup_k8s.sh"
 )
 
 GITHUB_BASE_URL="https://raw.githubusercontent.com/Axande/Scripting/refs/heads/main"
-
 
 # Function to select a folder
 select_folder() {
@@ -153,8 +151,8 @@ select_folder() {
     done
 }
 
-# Function to select a script within a folder
-select_script() {
+# Function to select scripts within a folder
+select_scripts() {
     local selected_folder="$1"
     local script_options=()
     declare -A script_map
@@ -165,30 +163,36 @@ select_script() {
         script_map["$script_name"]="$selected_folder/$script_name"
     done
 
-    local selected_script=""
-    select selected_script in "${script_options[@]}"; do
-        if [[ -n "$selected_script" ]]; then
-            echo "${script_map[$selected_script]}"
+    local selected_scripts=()
+    select script_choice in "${script_options[@]}"; do
+        if [[ -n "$script_choice" ]]; then
+            selected_scripts+=("${script_map[$script_choice]}")
+        fi
+        if [[ "${#selected_scripts[@]}" -gt 0 ]]; then
+            echo "${selected_scripts[@]}"
             return
         fi
     done
 }
 
-# Function to download and execute a script
+# Function to download and execute scripts
 download_and_execute() {
-    local script_path="$1"
-    local folder_path="$(dirname "$script_path")"
-    local script_name="$(basename "$script_path")"
+    local script_paths=($@)
+    for script_path in "${script_paths[@]}"; do
+        local folder_path="$(dirname "$script_path")"
+        local script_name="$(basename "$script_path")"
 
-    mkdir -p "$folder_path"
-    echo "Downloading: $script_path"
-    wget -O "$script_path" "$GITHUB_BASE_URL/$script_name"
-    chmod +x "$script_path"
-    echo "Running: $script_path"
-    sudo "$script_path"
+        mkdir -p "$folder_path"
+        echo "Downloading: $script_path"
+        wget -O "$script_path" "$GITHUB_BASE_URL/$script_name"
+        chmod +x "$script_path"
+        echo "Running: $script_path"
+        sudo "$script_path"
+    done
 }
 
 # Main execution
 selected_folder=$(select_folder)
-script_path=$(select_script "$selected_folder")
-download_and_execute "$script_path"
+script_paths=($(select_scripts "$selected_folder"))
+download_and_execute "${script_paths[@]}"
+# V2
