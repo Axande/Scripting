@@ -1,6 +1,6 @@
 # Define script categories and their script URLs
 declare -A script_folders
-script_folders["linux"]="Update ubuntu apt;ubuntu_update.sh;Docker install;docker_install.sh;Create User;create_user.sh;Setup GitHub;setup_github.sh"
+script_folders["linux"]="Update ubuntu apt;ubuntu_update.sh;Docker install;docker_install.sh;Create User;create_user.sh;Setup Git;setup_git.sh"
 script_folders["networking"]="Setup Static IP;static_ip_setup.sh;Update Hostname;update_hostname.sh"
 script_folders["kubernetes"]="Setup Kubernetes;setup_k8s.sh"
 
